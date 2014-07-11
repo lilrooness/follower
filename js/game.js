@@ -124,7 +124,7 @@
 				enemy.yvel = 0;
 			}
 
-			if(this.check_collisions(enemy, 3)) {
+			if(this.check_collisions(enemy, 3) && !this.lost) {
 				this.won = true;
 			}
 		};
@@ -161,7 +161,7 @@
 				this.player.yvel = 0;
 			}
 
-			if(this.check_collisions(this.player, 3)) {
+			if(this.check_collisions(this.player, 3) && !this.won) {
 				this.lost = true;
 			}
 		};
