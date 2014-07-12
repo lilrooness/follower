@@ -105,6 +105,13 @@
             }
             this.update_player();
             this.update_enemies();
+
+            //check entity collisions
+            for(var i=0; i<this.enemies.length; i++) {
+                if(this.check_entity_collisions(this.player, this.enemies[i])) {
+                    this.lost = true;
+                }
+            }
         };
 
         this.update_enemy = function(enemy) {
@@ -179,6 +186,14 @@
             }
 
         };
+
+        this.check_entity_collisions = function(player, follower) {
+            if(boxCollision(player.bbox, follower.bbox)) {
+                return true;
+            }
+
+            return false;
+        }
     };
 
     var makePlayerMoveCommand = function(player, x, y) {
