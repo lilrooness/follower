@@ -97,7 +97,7 @@
                 document.getElementById('end_message').innerHTML = 'SUCCESS';
             } else if(this.lost) {
                 document.getElementById('overlay').style.opacity = 0.5;
-                document.getElementById('end_message').innerHTML = 'FALIURE';
+                document.getElementById('end_message').innerHTML = 'FAILURE';
             }
             while(this.commands.length > 0) {
                 this.commands[0].execute(this.player);
