@@ -191,13 +191,16 @@
         }
 
         this.nextLevel = function() {
-            if(!this.lost) {
+            if(!this.lost && this.currentLevel < levels.length-1) {
                 this.won = false;
                 this.currentLevel += 1;
                 document.getElementById('overlay').style.display = 'none';
-            } else {
+            } else if(this.lost) {
                 this.lost = false;
                 document.getElementById('overlay').style.display = 'none';
+            } else {
+                //game completed
+                return;
             }
 
             this.player = spawnPlayer.bind(this)();
