@@ -20,6 +20,7 @@
 	opacity: 0;
 	z-index: 1;
 	background-color: white;
+	display: none;
 }
 
 .instructions {
@@ -35,4 +36,10 @@
 	color: black;
 	font-family: tahoma;
 	line-height: 240px;
+}
+
+.next_level {
+	text-align: center;
+	color: black;
+	font-family: tahoma;
 }

@@ -64,18 +64,10 @@
     Enemy.prototype = new Player();
 
     var Game = function () {
-        this.map = [[1,1,1,1,1,1,1,1,1,1,1,1,1],
-                     [1,0,0,0,0,0,0,0,0,0,0,0,1],
-                     [1,0,0,1,0,0,0,1,0,0,1,1,1],
-                     [1,0,1,0,0,0,0,1,0,0,0,0,0],
-                     [1,0,1,0,0,0,0,1,0,0,0,0,0],
-                     [1,0,1,0,0,0,0,0,0,0,0,0,1],
-                     [1,0,1,0,0,0,0,1,0,0,0,0,1],
-                     [1,0,1,2,0,0,0,1,0,0,0,3,1],
-                     [1,1,1,1,1,1,1,1,1,1,1,1,1]];
+
+        this.currentLevel = 0;
 
         this.running = true;
-        this.player = new Player(30, 30);
 
         this.commands = [];
         this.enemies = [];
@@ -83,27 +75,29 @@
         this.lost = false;
         this.won = false;
 
-        for(var y=0; y<this.map.length; y++) {
-            for(var x=0; x<this.map[y].length; x++) {
-                if(this.map[y][x] == 2) {
-                    this.enemies.push(new Enemy(x* env.tilesize, y * env.tilesize));
-                }
-            }
-        }
+        this.player = spawnPlayer.bind(this)();
+        this.enemies = spawnEnemies.bind(this)();
+
+        this.goneOnce = false;
 
         this.update = function() {
+            
             if(this.won) {
+                document.getElementById('overlay').style.display = 'inline';
                 document.getElementById('overlay').style.opacity = 0.5;
                 document.getElementById('end_message').innerHTML = 'SUCCESS';
             } else if(this.lost) {
+                document.getElementById('overlay').style.display = 'inline';
+                document.getElementById('next_level').style.display = 'none';
                 document.getElementById('overlay').style.opacity = 0.5;
-                document.getElementById('end_message').innerHTML = 'FAILURE';
+                document.getElementById('end_message').innerHTML = 'FAILURE (Click to restart)';
             }
             while(this.commands.length > 0) {
                 this.commands[0].execute(this.player);
                 this.commands.shift();
             }
             this.update_player();
+            this.goneOnce = true;
             this.update_enemies();
 
             //check entity collisions
@@ -152,6 +146,7 @@
         }
 
         this.update_player = function() {
+            
             this.player.update_player();
             var tempx = this.player.x;
             var tempy = this.player.y;
@@ -174,9 +169,9 @@
         };
 
         this.check_collisions = function(p, value) {
-            for(var y=0; y<game.map.length; y++) {
-                for(var x=0; x<game.map[y].length; x++) {
-                    if(this.map[y][x] == value) {
+            for(var y=0; y<levels[this.currentLevel].length; y++) {
+                for(var x=0; x<levels[this.currentLevel][y].length; x++) {
+                    if(levels[this.currentLevel][y][x] == value) {
                         tilebox =  {x: x * env.tilesize, y: y * env.tilesize, width: env.tilesize, height: env.tilesize};
                         if(boxCollision({x: p.x, y: p.y, width: env.enetitySize, height: env.enetitySize}, tilebox)) {
                             return true;
@@ -193,6 +188,42 @@
             }
 
             return false;
+        }
+
+        this.nextLevel = function() {
+            if(!this.lost) {
+                this.won = false;
+                this.currentLevel += 1;
+                document.getElementById('overlay').style.display = 'none';
+            } else {
+                this.lost = false;
+                document.getElementById('overlay').style.display = 'none';
+            }
+
+            this.player = spawnPlayer.bind(this)();
+            this.enemies = spawnEnemies.bind(this)();
+        };
+
+        function spawnPlayer() {
+            for(var y=0; y<levels[this.currentLevel].length; y++) {
+                for(var x=0; x<levels[this.currentLevel][y].length; x++) {
+                    if(levels[this.currentLevel][y][x] == 4) {
+                        return new Player(x* env.tilesize, y * env.tilesize);
+                    }
+                }
+            }            
+        }
+
+        function spawnEnemies() {
+            var enemies = [];
+            for(var y=0; y<levels[this.currentLevel].length; y++) {
+                for(var x=0; x<levels[this.currentLevel][y].length; x++) {
+                    if(levels[this.currentLevel][y][x] == 2) {
+                        enemies.push(new Enemy(x* env.tilesize, y * env.tilesize));
+                    }
+                }
+            }
+            return enemies;
         }
     };
 
@@ -283,9 +314,9 @@
             ctx.stroke();
         }
 
-        for(var y=0; y<game.map.length; y++) {
-            for(var x=0; x<game.map[y].length; x++) {
-                if(game.map[y][x] == 1) {
+        for(var y=0; y<levels[game.currentLevel].length; y++) {
+            for(var x=0; x<levels[game.currentLevel][y].length; x++) {
+                if(levels[game.currentLevel][y][x] == 1) {
                     context.beginPath();
                     context.rect(x * env.tilesize, y * env.tilesize, env.tilesize, env.tilesize);
                     context.fillStyle = 'yellow';
@@ -293,7 +324,7 @@
                     context.lineWidth = 7;
                     context.strokeStyle = 'black';
                     context.stroke();
-                } else if(game.map[y][x] == 3) {
+                } else if(levels[game.currentLevel][y][x] == 3) {
                     context.beginPath();
                     context.rect(x * env.tilesize, y * env.tilesize, env.tilesize, env.tilesize);
                     context.fillStyle = 'yellow';
@@ -354,5 +385,9 @@
 
     window.onkeyup = function(event) {
         inputHandler.pressed_keys[inputHandler.key_codes[event.keyCode]] = false;
+    };
+
+    document.getElementById('overlay').onclick = function() {
+        game.nextLevel();
     };
 })();
